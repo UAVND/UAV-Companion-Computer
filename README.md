@@ -32,7 +32,7 @@ Although ArduPilot's autonomous mode (i.e. `AUTO`) can connect waypoints, it can
 *Week of March 29th*
 
 ### Deliverables 
--Brief overview of problem context
+- Brief overview of problem context
 - Discussion of various path finding algorithms considered
   - Simple examples of algorithms seriously using matplotlib 
 - Discussion of selected algorithm
