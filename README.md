@@ -32,10 +32,13 @@ Although ArduPilot's autonomous mode (i.e. `AUTO`) can connect waypoints, it can
 *Week of March 29th*
 
 ### Deliverables 
-- Brief overview of problem context
+-Brief overview of problem context
 - Discussion of various path finding algorithms considered
+  - Simple examples of algorithms seriously using matplotlib 
 - Discussion of selected algorithm
+  -Comparison of runtimes/computational needs of algorithm
 - Demo of alorithm working in a region w/ layout similar to competition (can be nonROS)
+  - Read sample waypoint list from a JSON 
 - Present how this will be implemented in ROS 
 
 ### Goals
