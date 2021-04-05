@@ -14,7 +14,7 @@ class Node():
         self.parent = parent # Node that before this node
         self.position = position # Location tuple (x,y) of this Nodes location
 
-        self.G = 0 # Heuristic (estimated distance to destination) 
+        self.G = 0 # Heuristic (estimated distance to destination)
         self.H = 0 # Distance between current and start
         self.F = 0 # Total cost of node
 
@@ -24,7 +24,7 @@ class Node():
 
 # maze is 2D array of the map
     # 1 if there is an obstacle in that node, else 0
-# start, end are tuples (x, y) of nodes in the graph  
+# start, end are tuples (x, y) of nodes in the graph
 def a_star(maze, start, end):
     startNode = Node(None, start)
     endNode = Node(None, end)
@@ -34,13 +34,13 @@ def a_star(maze, start, end):
 
     while openList:
         currentNode = min_f(openList) # currentNode is the node in openList with the lowest F.  It is popped from the openList
-        closedList.append(currentNode) 
+        closedList.append(currentNode)
 
         if currentNode == endNode: # Found the destination
             return build_path(currentNode)
-        
+
         for adjacentNode in get_adjacent(maze, currentNode):
-            if adjacentNode in closedList: 
+            if adjacentNode in closedList:
                 continue
 
             adjacentNode.G = currentNode.G + node_distance(currentNode, adjacentNode)
@@ -49,7 +49,8 @@ def a_star(maze, start, end):
 
             cont = False
             for node in openList:
-                if adjacentNode.position == node.position and adjacentNode.G > node.position:
+                # made it compare the G values, initially had node.position in both comparisons
+                if adjacentNode.position == node.position and adjacentNode.G > node.G:
                     cont = True # Continue the for loop on line 34
             if cont: continue
 
@@ -62,20 +63,34 @@ def min_f(openList): # returns the node in openList with lowest F and pops the n
         if node.F == fmin:
             return openList.pop(i)
 
-def build_path(currentNode): 
-    path = [currentNode]
+def build_path(currentNode):
+    # I'm not sure long term if it makes sense but instead of appending node, I just appended the tuple positions
+    # makes it easier to read and digest at the moment, but if ROS and the drone needs the full node then easy switch back
+    path = [currentNode.position]
     while currentNode.parent:
-        path.append(currentNode.parent)
+        path.append(currentNode.parent.position)
         currentNode = currentNode.parent
-    return path.reverse()
+    # need to reverse path
+    resPath = []
+    for pos in reversed(path):
+        resPath.append(pos)
+    return resPath
+
+# added quick helper function to make sure the optimal path isn't cheating and going out of the competition boundaries
+def in_maze(node, maze):
+    if not 0 <= node.position[0] < len(maze):
+        return False
+    if not 0 <= node.position[1] < len(maze[node.position[0]]):
+        return False
+    return True
 
 def get_adjacent(maze, currentNode): # Returns all the nodes we can travel to from currentNode
     x, y = currentNode.position
     neighbors = [ Node(currentNode, (x-1,y-1)), Node(currentNode, (x,y-1)), Node(currentNode, (x+1,y-1)),
-                  Node(currentNode, (x-1,y))  ,                             Node(currentNode, (x+1,y)), 
+                  Node(currentNode, (x-1,y))  ,                             Node(currentNode, (x+1,y)),
                   Node(currentNode, (x-1,y+1)), Node(currentNode, (x,y+1)), Node(currentNode, (x+1,y))]
-    return [n for n in neighbors if not maze[n.position[0]][n.position[1]]] # return the neighbors that are not obstacles
+    return [n for n in neighbors if (not maze[n.position[0]][n.position[1]] and in_maze(n, maze))] # return the neighbors that are not obstacles and within boundaries of the maze
 
 def node_distance(node1, node2):
-    return math.sqrt((node1.position[0] - node2.position[0])**2 + (node1.position[1] - node2.position[1])**2) # distance between node1 and node2
-    # Note: he says you don't need to do sqrt in the article, but I'm not sure so I still did it
+    return (node1.position[0] - node2.position[0])**2 + (node1.position[1] - node2.position[1])**2 # distance between node1 and node2
+    # From testing, it seems like we do not need square root and it also significantly helps our time out
